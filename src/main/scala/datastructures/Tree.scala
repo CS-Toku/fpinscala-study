@@ -43,3 +43,4 @@ object Tree {
   def map2[A,B](tree: Tree[A])(f:A=>B): Tree[B] =
     fold(tree)(x=>Leaf(f(x)): Tree[B])((x,y) => Branch(x,y))
 }
+
