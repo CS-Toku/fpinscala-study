@@ -105,6 +105,64 @@ object List {
     case Nil => Nil
     case Cons(xs, xxs) => append(xs, flatlist(xxs))
   }
+
+  def add_one (l: List[Int]): List[Int] = l match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(x+1, add_one(xs))
+  }
+
+  def toDString (l: List[Double]): String = 
+    foldLeft(l, "")((z, x) => z+","+x.toString).tail
+
+  def map[A,B] (as :List[A])(f:A=>B): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => Cons(f(x),map(xs)(f))
+  }
+  
+  def filter[A] (as: List[A])(f:A => Boolean): List[A] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => 
+      if (f(x)) Cons(x, filter(xs)(f))
+      else filter(xs)(f)
+
+  }
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Nil => Nil
+    case Cons(x, xs) => append(f(x),flatMap(xs)(f))
+  }
+
+  def filter2[A] (as: List[A])(f:A=>Boolean): List[A] = 
+    flatMap(as)((x) => if(f(x)) List(x) else Nil)
+
+  def add_pair(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(x, xs), Cons(y, ys)) => Cons(x+y, add_pair(xs, ys))
+  }
+
+  def zipWith[A] (l1: List[A], l2: List[A])(f: (A, A) => A) : List[A] = (l1, l2) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
+  }
+
+  def isPrefix[A] (sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (Nil, _) => false
+    case (_, Nil) => true
+    case (Cons(x, xs), Cons(y, ys)) =>
+      if(x != y) false
+      else isPrefix(xs, ys)
+  }
+
+  def hasSubsequence[A] (sup: List[A], sub: List[A]): Boolean = sup match {
+    case Nil => false
+    case Cons(x, xs) =>
+      if(isPrefix(sup, sub)) true
+      else hasSubsequence(xs, sub)
+  }
+
+
 }
 
 

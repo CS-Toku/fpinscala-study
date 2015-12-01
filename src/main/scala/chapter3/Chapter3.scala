@@ -18,6 +18,9 @@ object Chapter3 {
       case _ => 101
     }
     println(x)
+
+    println(toDString(List(1.1,2.2,3.3,4.4,5.5)))
+    println(filter2(List(1,2,3,4,5,6,7,8,9))(_ <= 5))
   }
 }
 
