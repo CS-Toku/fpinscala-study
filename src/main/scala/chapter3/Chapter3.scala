@@ -25,7 +25,7 @@ object Chapter3 {
     //println(filter2(List(1,2,3,4,5,6,7,8,9))(_ <= 5))
 
     println(map2(Some(1), Some(1))(_ + _))
-    println(sequence(List(Some(1), Some(1), None)))
+    println(sequence(List(Some(1), Some(1), Some(2))))
     println(traverse(List(3, 6, 9))(x => if (x % 3 == 0) Some(x) else None))
   }
 }
