@@ -30,7 +30,36 @@ trait Stream[+A] {
       else Empty
     }
   }
+
+  def exists(p: A => Boolean): Boolean = this match {
+    case Cons(h, t) => p(h()) || t().exists(p)
+    case _ => false
+  }
+
+  def foldRight[B](z: => B)(f: (A, => B) => B): B = this match {
+    case Cons(h,t) => f(h(), t().foldRight(z)(f))
+    case _ => z
+  }
+
+  def forAll(p: A => Boolean): Boolean =
+    foldRight(true)((a, b) => p(a) && b)
+
+  def takeWhile2(p: A => Boolean): Stream[A] =
+    foldRight(Empty: Stream[A])((a, b) => if (p(a)) Stream.cons(a, b) else Empty)
+
+  def headOption2: Option[A] = foldRight(None: Option[A])((a, _) => Some(a))
+
+  def map[B](f: A => B): Stream[B] = foldRight(Empty: Stream[B])((a, b) => Stream.cons(f(a), b))
+
+  def filter(p: A => Boolean): Stream[A] = foldRight(Empty: Stream[A])((a, b) => if (p(a)) Stream.cons(a, b) else b)
+
+  def append[AA>:A](a: AA): Stream[AA] = foldRight(Stream(a))(Stream.cons(_, _))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] = map(f(_).headOption.get)
+
+  def find(p: A => Boolean): Option[A] = filter(p).headOption
 }
+
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
@@ -48,6 +77,29 @@ object Stream {
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
 
+  def ones: Stream[Int] = cons(1, ones)
 
-      
+  def constant[A](a: A): Stream[A] = cons(a, constant(a))
+
+  def from(n: Int): Stream[Int] = cons(n, from(n+1))
+
+  def fibs: Stream[Int] = {
+    def go(a: Int, b: Int): Stream[Int] = cons(a, go(b, a+b))
+    go(0, 1)
+  }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
+    case Some((a, s)) => cons(a, unfold(s)(f))
+    case None => Empty
+  }
+
+  def fibs2: Stream[Int] = unfold((0, 1)){case (a, b)  => Some(a, (b, a+b))}
+
+  def ones2: Stream[Int] = unfold(1)(_ => Some((1, 1)))
+
+  def constant2[A](a: A): Stream[A] = unfold(a)(_ => Some((a, a)))
+
+  def from2(n: Int): Stream[Int] = unfold(n)(x => Some((x, x+1)))
+
+
 }
