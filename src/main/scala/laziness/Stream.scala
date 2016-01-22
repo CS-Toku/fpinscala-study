@@ -86,6 +86,32 @@ trait Stream[+A] {
     case (_, Cons(h, t)) => Some((None, Some(h())), (Empty, t()))
     case (_, _) => None
   }
+
+  def startsWith[A](s: Stream[A]): Boolean = zipAll(s).forAll{
+    case (Some(a), Some(b)) => a == b
+    case (_, None) => true
+    case (None, _) => false
+  }
+  
+  def tails: Stream[Stream[A]] = Stream.cons(this, Stream.unfold(this){
+    case Cons(_, t) => Some((t(), t()))
+    case _ => None
+  })
+
+  def hasSubsequence[A](s: Stream[A]): Boolean = tails exists (_ startsWith s)
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = this match {
+    case Empty => Stream(z)
+    case Cons(h, t) => t().scanRight(z)(f) match {
+      case Empty => Empty
+      case xs@Cons(x, _) => Stream.cons(f(h(), x()), xs)
+    }
+  }
+
+  def scanRight2[B](z: B)(f: (A, => B) => B): Stream[B] = Stream.cons(foldRight(z)(f), Stream.unfold(this){
+    case Cons(h, t) => Some((t().foldRight(z)(f), t()))
+    case Empty => None
+  })
 }
 
 case object Empty extends Stream[Nothing]
